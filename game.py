@@ -75,3 +75,5 @@ def on_key_down(key):
     if enemy.colliderect(player):
         print("You died")
         exit()
+
+pgzrun.go()
