@@ -1,26 +1,29 @@
+#python -m pip install -U pgzero
 import pgzrun
+import numpy as np
 
 TILE_SIZE = 64
-WIDTH = TILE_SIZE * 8
-HEIGHT = TILE_SIZE * 8
+WIDTH_SIZE = 9
+HEIGHT_SIZE = 9
+WIDTH = TILE_SIZE * WIDTH_SIZE
+HEIGHT = TILE_SIZE * HEIGHT_SIZE
 
-tiles = ['empty', 'wall', 'goal', 'door', 'key']
-unlock = 0
+qlearning = np.zeros((WIDTH_SIZE,HEIGHT_SIZE,4)) # qlearning table
+
+tiles = ['empty', 'wall', 'goal', 'trap']
 
 maze = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 2, 0, 1],
-    [1, 0, 1, 0, 1, 1, 3, 1],
-    [1, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 4, 1, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 2, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 3, 1, 3, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
 player = Actor("player", anchor=(0, 0), pos=(1 * TILE_SIZE, 1 * TILE_SIZE))
-enemy = Actor("enemy", anchor=(0, 0), pos=(3 * TILE_SIZE, 6 * TILE_SIZE))
-enemy.yv = -1
 
 def draw():
     screen.clear()
@@ -31,7 +34,6 @@ def draw():
             tile = tiles[maze[row][column]]
             screen.blit(tile, (x, y))
     player.draw()
-    enemy.draw()
 
 def on_key_down(key):
     # player movement
@@ -45,35 +47,19 @@ def on_key_down(key):
         column = column - 1
     if key == keys.RIGHT:
         column = column + 1
+    
     tile = tiles[maze[row][column]]
+
     if tile == 'empty':
         x = column * TILE_SIZE
         y = row * TILE_SIZE
         animate(player, duration=0.1, pos=(x, y))
-    global unlock
     if tile == 'goal':
         print("Well done")
         exit()
-    elif tile == 'key':
-        unlock = unlock + 1
-        maze[row][column] = 0 # 0 is 'empty' tile
-    elif tile == 'door' and unlock > 0:
-        unlock = unlock - 1
-        maze[row][column] = 0 # 0 is 'empty' tile
-
-    # enemy movement
-    row = int(enemy.y / TILE_SIZE)
-    column = int(enemy.x / TILE_SIZE)
-    row = row + enemy.yv
-    tile = tiles[maze[row][column]]
-    if not tile == 'wall':
-        x = column * TILE_SIZE
-        y = row * TILE_SIZE
-        animate(enemy, duration=0.1, pos=(x, y))
-    else:
-        enemy.yv = enemy.yv * -1
-    if enemy.colliderect(player):
-        print("You died")
+    if tile == 'trap':
+        print("dead")
         exit()
+
 
 pgzrun.go()
