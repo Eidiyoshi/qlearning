@@ -107,12 +107,8 @@ def treinar(qlearning, learningRate, discoutingFactor, explorationRate, maxEpiso
     for episodes in range(maxEpisodes):
         x = xStart
         y = yStart
-        maxTurns = 10
-        turn = 0
-        while(tiles[maze[y][x]] != "fim" and turn < maxTurns):
-            turn += 1
+        while(tiles[maze[y][x]] != "fim"):
             acaoNumero = proximaAcao(x,y,explorationRate, qlearning)
-            print("acaonumero:",acaoNumero)
             rewardVar = reward(x,y,acaoNumero)
             
             xTemp, yTemp = definirPosicao(x,y,acaoNumero)
