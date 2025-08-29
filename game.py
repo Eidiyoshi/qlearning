@@ -2,17 +2,15 @@
 import pgzrun
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 
 TILE_SIZE = 64
-WIDTH_SIZE = 5
-HEIGHT_SIZE = 3
+WIDTH_SIZE = 9
+HEIGHT_SIZE = 9
 WIDTH = TILE_SIZE * WIDTH_SIZE
 HEIGHT = TILE_SIZE * HEIGHT_SIZE
 np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
 
 acoes = ["cima","baixo","esquerda","direita"]
-estados = ["comeco","parado","morto","fim"]
 
 tiles = ['vazio', 'parede', 'fim', 'trap']
 
@@ -27,12 +25,6 @@ maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
-maze = [
-    [1,1,1,1,1],
-    [1,2,0,0,1],
-    [1,1,1,1,1]
-
-]
 
 
 xStart = 3
@@ -115,15 +107,18 @@ def treinar(qlearning, learningRate, discoutingFactor, explorationRate, maxEpiso
     for episodes in range(maxEpisodes):
         x = xStart
         y = yStart
-        while(tiles[maze[y][x]] != "fim"):
+        maxTurns = 10
+        turn = 0
+        while(tiles[maze[y][x]] != "fim" and turn < maxTurns):
+            turn += 1
             acaoNumero = proximaAcao(x,y,explorationRate, qlearning)
+            print("acaonumero:",acaoNumero)
             rewardVar = reward(x,y,acaoNumero)
             
-            if(rewardVar == 100): print(rewardVar)
             xTemp, yTemp = definirPosicao(x,y,acaoNumero)
+            qlearning[y,x,acaoNumero] = (1 - learningRate ) * qlearning[y,x,acaoNumero] + learningRate * (rewardVar + discoutingFactor * np.max(qlearning[yTemp][xTemp]))
             if(tiles[maze[yTemp][xTemp]] != "parede"):
                 x, y = definirPosicao(x,y,acaoNumero)
-            qlearning[y,x,acaoNumero] = (1 - learningRate ) * qlearning[y,x,acaoNumero] + learningRate * (rewardVar + discoutingFactor * np.max(qlearning[yTemp][xTemp]))
             
     
     # desenhar grid
@@ -135,7 +130,7 @@ def treinar(qlearning, learningRate, discoutingFactor, explorationRate, maxEpiso
 learningRate = 0.5
 discoutingFactor = 0.95
 explorationRate = 8
-maxEpisodes = 100000
+maxEpisodes = 300
 qlearning = np.zeros((HEIGHT_SIZE,WIDTH_SIZE,4)) # qlearning table
 treinar(qlearning,learningRate,discoutingFactor,explorationRate,maxEpisodes,xStart,yStart)
 pgzrun.go()
